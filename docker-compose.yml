@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: hotel_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: hotel_admin
+      POSTGRES_PASSWORD: hotel_secure_password
+      POSTGRES_DB: hotel_reservation_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: hotel_backend_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/hotel_reservation_db
+      - SPRING_DATASOURCE_USERNAME=hotel_admin
+      - SPRING_DATASOURCE_PASSWORD=hotel_secure_password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=YmFzZTY0LWVuY29kZWQtc2VjcmV0LWtleS10aGF0LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHM=
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
